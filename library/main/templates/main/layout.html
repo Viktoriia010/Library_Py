@@ -1,0 +1,173 @@
+
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Bookly — Бібліотека{% endblock %}</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['DM Sans', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif']
+                    },
+                    colors: {
+                        cream: '#F8F7F2',
+                        forest: '#244C3B',
+                        sage: '#DCE9DF',
+                        muted: '#8B958C'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="bg-cream font-sans text-gray-800">
+
+<div class="min-h-screen flex">
+
+    <!-- SIDEBAR -->
+    <aside class="hidden lg:flex w-72 bg-white border-r border-gray-100 flex-col p-7">
+
+        <a href="/" class="flex items-center gap-3 mb-12">
+            <div class="w-11 h-11 bg-forest rounded-2xl flex items-center justify-center text-white text-2xl">
+                📚
+            </div>
+
+            <div>
+                <h1 class="font-bold text-2xl tracking-tight">
+                    bookly<span class="text-forest">.</span>
+                </h1>
+                <p class="text-xs text-muted">Library management</p>
+            </div>
+        </a>
+
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
+            Головне меню
+        </p>
+
+        <nav class="space-y-2">
+
+            <a href="/" class="flex items-center gap-3 px-4 py-3.5 rounded-xl bg-forest text-white font-semibold">
+                <span>▦</span> Каталог книг
+            </a>
+
+            {% if user.is_staff %}
+            <a href="/readers/" class="flex items-center gap-3 px-4 py-3.5 rounded-xl text-gray-500 hover:bg-cream transition">
+                <span>♧</span> Читачі
+            </a>
+
+            <a href="/loans/" class="flex items-center gap-3 px-4 py-3.5 rounded-xl text-gray-500 hover:bg-cream transition">
+                <span>↗</span> Виданні книги
+            </a>
+            {% endif %}
+
+        </nav>
+
+        <div class="mt-10">
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">
+                Обліковий запис
+            </p>
+
+            {% if user.is_authenticated %}
+                <div class="px-4 py-3 mb-2 rounded-xl bg-cream">
+                    <p class="font-semibold text-sm">{{ user.username }}</p>
+                    <p class="text-xs text-muted">
+                        {% if user.is_staff %}Адміністратор{% else %}Читач{% endif %}
+                    </p>
+                </div>
+
+                <form  method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full text-left flex items-center gap-3 px-4 py-3.5 rounded-xl text-gray-500 hover:bg-cream transition">
+                        <span>↪</span> Вийти
+                    </button>
+                </form>
+            {% else %}
+                <a  class="flex items-center gap-3 px-4 py-3.5 rounded-xl text-gray-500 hover:bg-cream transition">
+                    <span>↪</span> Увійти
+                </a>
+            {% endif %}
+        </div>
+
+        <div class="mt-auto bg-[#F0F4EF] rounded-2xl p-5">
+            <div class="text-2xl mb-3">🌿</div>
+            <h3 class="font-bold text-forest">Світ книг чекає!</h3>
+            <p class="text-xs text-gray-500 mt-2 leading-relaxed">
+                Знаходь нові історії та відкривай для себе щось цікаве.
+            </p>
+        </div>
+
+    </aside>
+
+
+    <!-- MAIN -->
+    <main class="flex-1 min-w-0">
+
+        <!-- HEADER -->
+        <header class="bg-white/80 backdrop-blur border-b border-gray-100 px-5 md:px-10 py-5 flex justify-between items-center">
+
+            <div>
+                <p class="text-xs text-muted">Ласкаво просимо до Bookly</p>
+                <h2 class="font-bold text-lg">Бібліотека</h2>
+            </div>
+
+            <div class="flex items-center gap-4">
+
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-[#DCE9DF] flex items-center justify-center font-bold text-forest">
+                        {% if user.is_authenticated %}
+                            {{ user.username|first|upper }}
+                        {% else %}
+                            ?
+                        {% endif %}
+                    </div>
+
+                    <div class="hidden sm:block">
+                        <p class="text-sm font-bold">
+                            {% if user.is_authenticated %}
+                                {{ user.username }}
+                            {% else %}
+                                Гість
+                            {% endif %}
+                        </p>
+
+                        <p class="text-xs text-muted">
+                            {% if user.is_staff %}Admin account{% else %}Library account{% endif %}
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- PAGE CONTENT -->
+        <div class="p-5 md:p-10 max-w-7xl mx-auto">
+
+            {% block content %}
+            {% endblock %}
+
+            <!-- FOOTER -->
+            <footer class="mt-12 py-6 border-t border-gray-200 flex flex-col sm:flex-row justify-between gap-3 text-xs text-gray-400">
+                <p>© 2026 Bookly Library. Усі права захищені.</p>
+                <p>Створено з любов'ю до книг ♥</p>
+            </footer>
+
+        </div>
+
+    </main>
+
+</div>
+
+</body>
+</html>

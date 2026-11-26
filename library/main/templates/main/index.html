@@ -1,0 +1,225 @@
+
+{% extends 'main/layout.html' %}
+
+{% block title %}Каталог книг — Bookly{% endblock %}
+
+{% block content %}
+
+<!-- INTRO -->
+<div class="flex flex-col md:flex-row md:justify-between md:items-end gap-5 mb-9">
+
+    <div>
+        <p class="text-forest font-semibold text-sm mb-2">
+            ✦ Вітаємо у Bookly
+        </p>
+
+        <h1 class="font-serif text-4xl md:text-5xl text-gray-900">
+            Світ неймовірних <br>
+            <span class="text-forest italic">історій.</span>
+        </h1>
+
+        <p class="text-gray-500 mt-4 max-w-lg">
+            Керуй бібліотекою, знаходь улюблені книги та відкривай нові літературні світи.
+        </p>
+    </div>
+
+    {% if user.is_staff %}
+    <a href="/books/add/" class="bg-forest text-white px-6 py-3.5 rounded-xl font-semibold hover:bg-[#193B2D] transition shadow-lg shadow-green-900/10">
+        + Додати книгу
+    </a>
+    {% endif %}
+
+</div>
+
+
+<!-- STATISTICS -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-10">
+
+    <div class="bg-white p-6 rounded-2xl border border-gray-100">
+        <div class="flex justify-between">
+            <span class="text-sm text-gray-500">Усього книг</span>
+            <span class="text-xl">📚</span>
+        </div>
+        <h3 class="text-3xl font-bold mt-4">{{ total_books }}</h3>
+        <p class="text-xs text-green-700 mt-2">У каталозі бібліотеки</p>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl border border-gray-100">
+        <div class="flex justify-between">
+            <span class="text-sm text-gray-500">У наявності</span>
+            <span class="text-xl">✓</span>
+        </div>
+        <h3 class="text-3xl font-bold mt-4">{{ available_books }}</h3>
+        <p class="text-xs text-green-700 mt-2">Доступні для читання</p>
+    </div>
+
+    <div class="bg-white p-6 rounded-2xl border border-gray-100">
+        <div class="flex justify-between">
+            <span class="text-sm text-gray-500">Видано читачам</span>
+            <span class="text-xl">📖</span>
+        </div>
+        <h3 class="text-3xl font-bold mt-4">{{ borrowed_books }}</h3>
+        <p class="text-xs text-orange-600 mt-2">Зараз на руках</p>
+    </div>
+
+    {% if user.is_staff %}
+    <div class="bg-white p-6 rounded-2xl border border-gray-100">
+        <div class="flex justify-between">
+            <span class="text-sm text-gray-500">Читачі</span>
+            <span class="text-xl">👥</span>
+        </div>
+        <h3 class="text-3xl font-bold mt-4">{{ total_readers }}</h3>
+        <p class="text-xs text-green-700 mt-2">Зареєстровані користувачі</p>
+    </div>
+    {% endif %}
+
+</div>
+
+
+<!-- BOOKS SECTION -->
+<section>
+
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
+
+        <div>
+            <h2 class="text-2xl font-bold">Каталог книг</h2>
+            <p class="text-sm text-gray-500 mt-1">
+                Знайди наступну книгу для читання
+            </p>
+        </div>
+
+        <div class="flex gap-2">
+
+            <a href="/"
+               class="{% if not request.GET.filter or request.GET.filter == 'all' %}bg-forest text-white{% else %}bg-white border border-gray-200 text-gray-600{% endif %} px-5 py-2.5 rounded-xl text-sm font-semibold">
+                Усі книги
+            </a>
+
+            <a href="?filter=available"
+               class="{% if request.GET.filter == 'available' %}bg-forest text-white{% else %}bg-white border border-gray-200 text-gray-600{% endif %} px-5 py-2.5 rounded-xl text-sm font-semibold">
+                У наявності
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <!-- SEARCH -->
+    <form method="get" class="bg-white rounded-2xl p-4 border border-gray-100 flex flex-col md:flex-row gap-3 mb-6">
+
+        {% if request.GET.filter == 'available' %}
+            <input type="hidden" name="filter" value="available">
+        {% endif %}
+
+        <div class="flex-1 relative">
+            <span class="absolute left-4 top-3.5 text-gray-400">⌕</span>
+
+            <input
+                type="text"
+                name="search"
+                value="{{ request.GET.search }}"
+                placeholder="Пошук за назвою або автором..."
+                class="w-full bg-cream rounded-xl pl-11 pr-4 py-3 text-sm outline-none focus:ring-2 focus:ring-sage">
+        </div>
+
+        <button type="submit" class="bg-gray-900 text-white rounded-xl px-6 py-3 text-sm font-semibold hover:bg-forest transition">
+            Знайти
+        </button>
+
+    </form>
+
+
+    <!-- BOOK TABLE -->
+    <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+
+        <div class="overflow-x-auto">
+
+            <table class="w-full text-left min-w-[850px]">
+
+                <thead class="bg-[#F8F9F6] text-xs uppercase tracking-wider text-gray-400">
+                    <tr>
+                        <th class="px-6 py-5">Книга</th>
+                        <th class="px-6 py-5">Автор</th>
+                        <th class="px-6 py-5">Жанр</th>
+                        <th class="px-6 py-5">Рік</th>
+                        <th class="px-6 py-5">Видавництво</th>
+                        <th class="px-6 py-5">Статус</th>
+                    </tr>
+                </thead>
+
+                <tbody class="divide-y divide-gray-100">
+
+                    {% for book in books %}
+
+                    <tr class="hover:bg-[#FAFBF8] transition">
+
+                        <td class="px-6 py-5">
+                            <div class="font-bold text-gray-800">
+                                {{ book.name }}
+                            </div>
+                        </td>
+
+                        <td class="px-6 py-5 text-sm text-gray-500">
+                            {{ book.author }}
+                        </td>
+
+                        <td class="px-6 py-5">
+                            <span class="bg-[#F0F4EF] text-forest px-3 py-1.5 rounded-lg text-xs font-semibold">
+                                {{ book.genre }}
+                            </span>
+                        </td>
+
+                        <td class="px-6 py-5 text-sm text-gray-500">
+                            {{ book.year }}
+                        </td>
+
+                        <td class="px-6 py-5 text-sm text-gray-500">
+                            {{ book.publisher }}
+                        </td>
+
+                        <td class="px-6 py-5">
+
+                            {% if book.is_available %}
+                                <span class="bg-green-50 text-green-700 px-3 py-1.5 rounded-full text-xs font-semibold">
+                                    ● У наявності
+                                </span>
+                            {% else %}
+                                <span class="bg-orange-50 text-orange-700 px-3 py-1.5 rounded-full text-xs font-semibold">
+                                    ● Видана
+                                </span>
+                            {% endif %}
+
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+                        <td colspan="6" class="text-center py-16 text-gray-400">
+                            <div class="text-4xl mb-3">📚</div>
+                            <p>Книг поки немає</p>
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <!-- FOOTER TABLE -->
+        <div class="p-5 border-t border-gray-100 flex justify-between items-center">
+            <p class="text-xs text-gray-400">
+                Усього знайдено: {{ books|length }} книг
+            </p>
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}
