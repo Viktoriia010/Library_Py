@@ -1,0 +1,42 @@
+{% extends 'main/layout.html' %}
+
+{% block content %}
+
+<h1 class="text-3xl font-bold mb-6">Читачі бібліотеки</h1>
+
+{% for reader in readers %}
+
+<div class="bg-white rounded-2xl p-6 mb-4">
+
+    <h2 class="font-bold text-xl">
+        <a href="{% url 'reader_detail' reader.id %}">
+            {{ reader.name }} {{ reader.surname }}
+        </a>
+    </h2>
+
+    <p>Телефон: {{ reader.phone }}</p>
+    <p>Email: {{ reader.email }}</p>
+    <p>Дата реєстрації: {{ reader.registration_date }}</p>
+
+    <h3 class="font-bold mt-4 mb-2">Взяті книги:</h3>
+
+   {% for copy in reader.book_copies.all %}
+
+    <p>
+        {{ copy.book.name }} —
+        {{ copy.book.author }}
+        (примірник №{{ copy.id }})
+    </p>
+
+{% empty %}
+
+    <p class="text-gray-400">
+        Читач ще не брав книг
+    </p>
+
+{% endfor %}
+</div>
+
+{% endfor %}
+
+{% endblock %}

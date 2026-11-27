@@ -23,7 +23,7 @@
         </p>
     </div>
 
-    {% if user.is_staff %}
+    {% if user.is_authenticated and user.reader.role == 'librarian' %}
     <a href="/books/add/" class="bg-forest text-white px-6 py-3.5 rounded-xl font-semibold hover:bg-[#193B2D] transition shadow-lg shadow-green-900/10">
         + Додати книгу
     </a>
@@ -40,7 +40,7 @@
             <span class="text-sm text-gray-500">Усього книг</span>
             <span class="text-xl">📚</span>
         </div>
-        <h3 class="text-3xl font-bold mt-4">{{ total_books }}</h3>
+        <h3 class="text-3xl font-bold mt-4">{{ info.books|length }}</h3>
         <p class="text-xs text-green-700 mt-2">У каталозі бібліотеки</p>
     </div>
 
@@ -49,7 +49,7 @@
             <span class="text-sm text-gray-500">У наявності</span>
             <span class="text-xl">✓</span>
         </div>
-        <h3 class="text-3xl font-bold mt-4">{{ available_books }}</h3>
+        <h3 class="text-3xl font-bold mt-4">{{ info.available_books }}</h3>
         <p class="text-xs text-green-700 mt-2">Доступні для читання</p>
     </div>
 
@@ -58,17 +58,17 @@
             <span class="text-sm text-gray-500">Видано читачам</span>
             <span class="text-xl">📖</span>
         </div>
-        <h3 class="text-3xl font-bold mt-4">{{ borrowed_books }}</h3>
+        <h3 class="text-3xl font-bold mt-4">{{ info.borrowed_books }}</h3>
         <p class="text-xs text-orange-600 mt-2">Зараз на руках</p>
     </div>
 
-    {% if user.is_staff %}
+    {% if user.is_authenticated and user.reader.role == 'librarian' %}
     <div class="bg-white p-6 rounded-2xl border border-gray-100">
         <div class="flex justify-between">
             <span class="text-sm text-gray-500">Читачі</span>
             <span class="text-xl">👥</span>
         </div>
-        <h3 class="text-3xl font-bold mt-4">{{ total_readers }}</h3>
+        <h3 class="text-3xl font-bold mt-4">{{ info.total_readers }}</h3>
         <p class="text-xs text-green-700 mt-2">Зареєстровані користувачі</p>
     </div>
     {% endif %}
@@ -150,13 +150,16 @@
 
                 <tbody class="divide-y divide-gray-100">
 
-                    {% for book in books %}
+                    {% for book in info.books %}
 
                     <tr class="hover:bg-[#FAFBF8] transition">
 
                         <td class="px-6 py-5">
                             <div class="font-bold text-gray-800">
-                                {{ book.name }}
+                                <a href="{% url 'book_detail' book.id %}"
+                                   class="hover:text-forest transition">
+                                    {{ book.name }}
+                                </a>
                             </div>
                         </td>
 
@@ -180,13 +183,13 @@
 
                         <td class="px-6 py-5">
 
-                            {% if book.is_available %}
+                            {% if book.available_copies > 0 %}
                                 <span class="bg-green-50 text-green-700 px-3 py-1.5 rounded-full text-xs font-semibold">
-                                    ● У наявності
+                                    ● У наявності ({{ book.available_copies }})
                                 </span>
                             {% else %}
                                 <span class="bg-orange-50 text-orange-700 px-3 py-1.5 rounded-full text-xs font-semibold">
-                                    ● Видана
+                                    ● Немає в наявності
                                 </span>
                             {% endif %}
 
@@ -214,7 +217,7 @@
         <!-- FOOTER TABLE -->
         <div class="p-5 border-t border-gray-100 flex justify-between items-center">
             <p class="text-xs text-gray-400">
-                Усього знайдено: {{ books|length }} книг
+                Усього знайдено: {{ info.books|length }} книг
             </p>
         </div>
 

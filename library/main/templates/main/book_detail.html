@@ -1,0 +1,148 @@
+
+{% extends 'main/layout.html' %}
+
+{% block title %}{{ book.name }} — Bookly{% endblock %}
+
+{% block content %}
+
+<div class="mb-8">
+    <a href="/" class="text-sm text-forest font-semibold hover:underline">
+        ← Назад до каталогу
+    </a>
+</div>
+
+<div class="bg-white rounded-3xl border border-gray-100 p-8 md:p-12">
+
+    <div class="flex flex-col md:flex-row gap-8">
+
+        <div class="w-full md:w-52 h-64 bg-[#DCE9DF] rounded-3xl flex items-center justify-center text-7xl shrink-0">
+            📖
+        </div>
+
+        <div class="flex-1">
+
+            <span class="inline-block bg-[#F0F4EF] text-forest px-4 py-2 rounded-full text-xs font-bold mb-5">
+                {{ book.genre }}
+            </span>
+
+            <h1 class="font-serif text-4xl md:text-5xl text-gray-900">
+                {{ book.name }}
+            </h1>
+
+            <p class="text-lg text-gray-500 mt-3">
+                {{ book.author }}
+            </p>
+
+            <div class="mt-7">
+                <p class="font-semibold mt-5">
+                    Усього примірників: {{ total_copies  }}
+                </p>
+
+                <p class="text-green-700">
+                    У наявності:
+                    {{ available_copies }}
+                </p>
+
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-10">
+
+                <div class="bg-cream p-5 rounded-2xl">
+                    <p class="text-xs text-gray-400 mb-2">Рік видання</p>
+                    <p class="font-bold text-lg">{{ book.year }}</p>
+                </div>
+
+                <div class="bg-cream p-5 rounded-2xl">
+                    <p class="text-xs text-gray-400 mb-2">Видавництво</p>
+                    <p class="font-bold text-lg">{{ book.publisher }}</p>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+    <!-- ПРИМІРНИКИ КНИГИ -->
+
+<div class="mt-8 border-t border-gray-100 pt-6">
+
+    <h2 class="text-xl font-bold mb-4">
+        Примірники книги
+    </h2>
+
+    {% for copy in copies %}
+
+        <div class="bg-cream p-4 rounded-xl mb-3">
+
+            <p class="font-semibold">
+                Примірник №{{ copy.id }}
+            </p>
+
+            {% if copy.is_available %}
+
+                <span class="text-green-700 text-sm">
+                    ● У наявності
+                </span>
+
+            {% else %}
+
+                <span class="text-orange-700 text-sm">
+                    ● Виданий:
+                    {{ copy.reader.name }}
+                    {{ copy.reader.surname }}
+                </span>
+
+                <p class="text-sm text-gray-500 mt-1">
+                    {{ copy.reader.email }}
+                </p>
+
+            {% endif %}
+
+            {% if copy.is_available and user.is_authenticated and user.reader.role == 'librarian' %}
+
+                <form method="post"
+                      action="{% url 'give_book' copy.id %}"
+                      class="mt-3">
+
+                    {% csrf_token %}
+
+                    <select name="reader_id"
+                            required
+                            class="border rounded-lg p-2">
+
+                        <option value="">Оберіть читача</option>
+
+                        {% for reader in readers %}
+
+                            <option value="{{ reader.id }}">
+                                {{ reader.name }} {{ reader.surname }}
+                            </option>
+
+                        {% endfor %}
+
+                    </select>
+
+                    <button type="submit"
+                            class="bg-forest text-white px-4 py-2 rounded-lg ml-2">
+                        Видати книгу
+                    </button>
+
+                </form>
+
+            {% endif %}
+
+        </div>
+
+    {% empty %}
+
+        <p class="text-gray-400">
+            Примірників поки немає
+        </p>
+
+    {% endfor %}
+
+</div>
+
+</div>
+
+{% endblock %}
